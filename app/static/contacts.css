@@ -1,0 +1,107 @@
+textarea {
+    resize: vertical;
+    min-height: 250px;
+    background: transparent;
+    border-width: 3px;
+    border-style: inset;
+    color: #fff;
+    font-size: 16px;
+}
+
+input {
+    background: transparent;
+    border-width: 3px;
+    color: #fff;
+    font-size: 16px;
+}
+
+.content {
+    position: relative;
+    z-index: 200;
+    width: 60%;
+    margin: 0 auto;
+}
+
+@media screen and (max-width: 767px) {
+    .content{
+        width: 90%;
+    }
+}
+
+.link {
+    color: #A9A9A9;
+}
+
+.link:hover {
+    -webkit-animation: link 2s linear infinite;
+    animation: link 2s linear infinite;
+}
+
+@-webkit-keyframes link {
+    0% {
+        color: #808080;
+    }
+    50% {
+        color: #404040;
+    }
+    100% {
+        color: #808080;
+    }
+}
+
+@keyframes link {
+    0% {
+        color: #808080;
+    }
+    50% {
+        color: #404040;
+    }
+    100% {
+        color: #808080;
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin: 15px 0;
+}
+
+.button {
+    border-width: 3px;
+    border-radius: 0.25rem;
+    background: transparent;
+    color: #fff;
+    text-align: center;
+
+    transition: color 0.2s linear, background 0.2s linear;
+}
+
+.button:hover {
+    color: #1B1B1B;
+    background: #808080;
+}
+
+.flash-message {
+    z-index: 0;
+    -webkit-animation: flash-message 5s linear;
+    opacity: 0;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100px;
+    margin: -10px -50px;
+}
+
+@-webkit-keyframes flash-message {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+

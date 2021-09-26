@@ -1,0 +1,135 @@
+h2 {
+    text-align: center;
+}
+
+img {
+    margin: 5px;
+    display: inline-block;
+}
+
+input {
+    background: transparent;
+    border-width: 3px;
+    color: #fff;
+    font-size: 16px;
+    margin: 5px 10px;
+}
+
+td {
+    text-align: center;
+}
+
+.button {
+    border-width: 3px;
+    border-radius: 0.25rem;
+    background: transparent;
+    color: #fff;
+    text-align: center;
+
+    transition: color 0.2s linear, background 0.2s linear;
+}
+
+.button:hover:enabled {
+    color: #1B1B1B;
+    background: #808080;
+}
+
+.arkanoid {
+    position: relative;
+    width: 800px;
+    height: 600px;
+    margin: 0 auto;
+}
+
+.top-scores {
+    width: 80%;
+    display: block;
+    position: absolute;
+    z-index: 100;
+    left: 10%;
+    top: 5%;
+    opacity: 0;
+    transition: 1s;
+}
+
+.form {
+    opacity: 0;
+    transition: 1s;
+    width: 80%;
+    position: absolute;
+    z-index: 110;
+    left: 10%;
+    top: 30%;
+}
+
+.add-score-input {
+    width: 100%;
+}
+
+.small-width {
+    display:none;
+}
+
+.description {
+    width: 100%;
+    margin: 40px auto;
+}
+
+.items, .monsters {
+    border-color: grey;
+    margin: 0 auto;
+    width: 100%;
+}
+
+#arkanoid-background {
+    margin: 0;
+    display: block;
+    position: absolute;
+    top: 0;
+    z-index: 0;
+}
+
+#arkanoid {
+    position: relative;
+    z-index: 10;
+    outline: none;
+}
+
+@media screen and (max-width: 1000px) {
+    .content {
+        width: 100%;
+        margin: 0 auto;
+    }
+    .description {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    .content{
+        width: 90%;
+    }
+    .arkanoid {
+        display: none;
+    }
+
+    .small-width {
+        display:block;
+    }
+
+    .description {
+        width: 100%;
+        margin: 0 auto;
+    }
+    td {
+        display: block;
+    }
+
+    th {
+        display: none;
+    }
+}
+
+
+
+

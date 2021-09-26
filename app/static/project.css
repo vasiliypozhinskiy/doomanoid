@@ -1,0 +1,68 @@
+h1 {
+    text-align: center;
+    }
+
+p {
+   text-align: justify;
+   }
+
+@media screen and (max-width: 767px) {
+p {
+   text-align: left;
+   }
+}
+
+a {
+   display: block;
+   color: #A4A4A4;
+   width: fit-content;
+   width: -moz-fit-content;
+   margin: 0 auto;
+   text-transform: uppercase;
+   outline: none;
+   }
+
+ a:hover {
+         color: #808080;
+         }
+
+.inline-link {
+    display: inline-block;
+}
+
+img {
+    display: block;
+    margin: 20px auto 0;
+    }
+
+.packing-img {
+    width: 60%;
+}
+
+@media screen and (max-width: 1023px) {
+    .packing-img {
+    margin: 0 auto;
+    width: 80%;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .packing-img {
+    margin: 0 auto;
+    width: 100%;
+    }
+}
+
+.content {
+          width: 80%;
+          margin: 0 auto;
+          }
+
+.description {
+              text-align: center;
+              margin: 0 auto;
+              }
+
+#app {
+    margin: 0 auto;
+}
