@@ -10,4 +10,4 @@ RUN pip install -r requirements.txt
 
 RUN pip install uWSGI
 
-CMD ["uwsgi", "--http", "0.0.0.0:5000", "--wsgi-file", "/app/main.py", "--callable", "app"]
+CMD ["uwsgi", "--http", "0.0.0.0:5000", "--wsgi-file", "main.py", "--callable", "app"]

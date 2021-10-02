@@ -1,8 +1,8 @@
-version: "3.9"
+version: "3.3"
 
 services:
     app:
-        build: ./app
+        build: ./doomanoid
         container_name:  app
         restart: always
         ports:
@@ -12,7 +12,7 @@ services:
         volumes:
             - ./nginx.conf:/etc/nginx/nginx.conf
         ports:
-            - "8080:80"
+            - "80:80"
         expose:
             - 80
         environment:
@@ -21,10 +21,14 @@ services:
         image: postgres
         restart: always
         volumes:
+            - ./db_init.sql:/docker-entrypoint-initdb.d/init.sql
             - ./postgres_data:/var/lib/postgresql/data
         environment:
-            POSTGRES_USER: doomanoid_user
-            POSTGRES_PASSWORD: doomanoid_password
+            - POSTGRES_USER=user
+            - POSTGRES_PASSWORD=password
+            - APP_DB_USER=doomanoid_user
+            - APP_DB_PASS=doomanoid_password
+            - APP_DB_NAME=doomanoid
         ports:
             - "5432:5432"
 
