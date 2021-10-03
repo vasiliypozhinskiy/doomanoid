@@ -1,12 +1,13 @@
-import random
 from datetime import datetime
 from urllib.parse import unquote
 
-from flask import Blueprint, render_template, jsonify, request
+from flask import render_template, jsonify, request
+from sqlalchemy import func
 
 from app import app
 from app.arkanoid_cfg import arkanoidConfig
 from app.models import ArkanoidScore
+from app.level_generation import generate_default_lvl, generate_lvl_with_arachnotrons
 from app import db
 
 
@@ -29,30 +30,10 @@ def get_config():
 @app.route('/generate_arkanoid_lvl')
 def generate_lvl():
     lvl = int(request.args["lvl"])
-    bricks = []
-    while not bricks:
-        for i in range(8):
-            for j in range(4):
-                x = i * (arkanoidConfig["BRICK_WIDTH"] + arkanoidConfig["BRICK_OFFSET_X"]) + 40
-                y = j * (arkanoidConfig["BRICK_HEIGHT"] + arkanoidConfig["BRICK_OFFSET_Y"]) + arkanoidConfig["BRICK_OFFSET_Y"] + 20
-                new_brick = generate_brick(x, y, lvl)
-                if new_brick:
-                    bricks.append(new_brick)
-    bonuses = []
-    enemies = []
-    enemies = enemies + generate_barons(bricks, lvl // 5)
-    if lvl < 5:
-        enemies = enemies + generate_enemies(bricks, lvl)
-    elif lvl < 15:
-        enemies = enemies + generate_enemies(bricks, 2 + lvl // 2)
-    else:
-        enemies = enemies + generate_enemies(bricks, 10)
-
-    for brick in bricks:
-        if not brick["has_enemy"]:
-            new_bonus = generate_bonus(brick)
-            if new_bonus:
-                bonuses.append(new_bonus)
+    # if lvl % 5 == 3:
+    bricks, bonuses, enemies = generate_lvl_with_arachnotrons(lvl)
+    # else:
+    #     bricks, bonuses, enemies = generate_default_lvl(lvl)
     return jsonify(bricks=bricks, bonuses=bonuses, enemies=enemies)
 
 
@@ -67,89 +48,57 @@ def add_score():
     return "", 204
 
 
-@app.route('/show_score')
-def show_score():
-    query = db.session.query(ArkanoidScore).order_by(ArkanoidScore.score.desc())
-    answer = []
-    for score in query:
-        score_dict = score.as_dict()
-        if len(score_dict["username"]) > 30:
-            excess_chars = len(score_dict["username"]) - 30
-            score_dict["username"] = score_dict["username"][:-excess_chars]
-        answer.append(score_dict)
-    return jsonify(answer)
+@app.route('/show_user_result')
+def show_user_result():
+    current_username = request.args['username']
+    current_score = int(request.args['score'])
+    rows = ArkanoidScore.query.with_entities(
+        func.row_number().over(order_by=ArkanoidScore.score.desc()).label('number'), ArkanoidScore.username, ArkanoidScore.score
+    )
+
+    rows_as_dict = []
+    for row in rows:
+        rows_as_dict.append(row._asdict())
+
+    index_of_current = next(i for i, row_as_dict in enumerate(rows_as_dict)
+                            if row_as_dict['username'] == current_username and row_as_dict['score'] == current_score)
+    page_index = index_of_current // 20 + 1
+    page_rows, has_prev, has_next = get_score_by_page(page_index)
+    result = {
+        'page_rows': page_rows,
+        'page_index': page_index,
+        'has_prev': has_prev,
+        'has_next': has_next
+    }
+
+    return jsonify(result)
 
 
-def generate_brick(x, y, lvl):
-    seed = random.randint(0, 100)
-    if seed <= 5 + 2 * lvl:
-        brick = {"type": 'grey', "x": x, "y": y, "has_enemy": False}
-    elif seed <= 30 + 2 * lvl:
-        brick = {"type": 'brown', "x": x, "y": y, "has_enemy": False}
-    else:
-        seed = random.randint(0, 100)
-        if seed <= 50:
-            brick = {"type": 'default', "x": x, "y": y, "has_enemy": False}
-        else:
-            return None
-    return brick
+@app.route('/show_score_page')
+def show_score_page():
+    page_index = int(request.args['page_index'])
+    page_rows, has_prev, has_next = get_score_by_page(page_index)
+    result = {
+        'page_rows': page_rows,
+        'has_prev': has_prev,
+        'has_next': has_next
+    }
+    return jsonify(result)
 
 
-def generate_barons(bricks, count):
-    top_bricks = [(brick, bricks.index(brick)) for brick in bricks if brick["y"] == arkanoidConfig["BRICK_OFFSET_Y"] + 20]
-    seeds = []
-    barons = []
-    if count > len(top_bricks):
-        count = len(top_bricks)
-    while len(seeds) < count:
-        seed = random.randint(0, len(top_bricks) - 1)
-        if seed not in seeds:
-            seeds.append(seed)
-    for seed in seeds:
-        enemy = {"type": "baron", "x": bricks[top_bricks[seed][1]]["x"], "y": bricks[top_bricks[seed][1]]["y"]}
-        bricks[top_bricks[seed][1]]["has_enemy"] = True
-        barons.append(enemy)
-    return barons
+def get_score_by_page(page_index):
+    page_rows = ArkanoidScore.query.with_entities(
+        func.row_number().over(order_by=ArkanoidScore.score.desc()).label('number'), ArkanoidScore.username,
+        ArkanoidScore.score, ArkanoidScore.date
+    ).paginate(int(page_index), 20, False)
 
+    result = []
+    for row in page_rows.items:
+        row_as_dict = row._asdict()
+        row_as_dict['date'] = row_as_dict['date'].strftime("%d.%m.%y")
+        result.append(row_as_dict)
 
-def generate_enemies(bricks, count):
-    enemies = []
-    seeds = []
-    if count > len(bricks):
-        count = len(bricks)
-    while len(seeds) < count:
-        seed = random.randint(0, len(bricks) - 1)
-        if seed not in seeds and not bricks[seed]["has_enemy"]:
-            seeds.append(seed)
-    for seed in seeds:
-        random_enemy = random.randint(0, 100)
-        if random_enemy >= 70:
-            enemy = {"type": "imp", "x": bricks[seed]["x"], "y": bricks[seed]["y"]}
-        else:
-            enemy = {"type": "doomguy", "x": bricks[seed]["x"], "y": bricks[seed]["y"]}
-        bricks[seed]["has_enemy"] = True
-        enemies.append(enemy)
-    return enemies
-
-
-def generate_bonus(brick):
-    seed = random.randint(0, 100)
-    if seed >= 95:
-        bonus = {"type": "life", "x": brick["x"], "y": brick["y"]}
-    elif seed >= 90:
-        bonus = {"type": "invisibility", "x": brick["x"], "y": brick["y"]}
-    elif seed >= 85:
-        bonus = {"type": "mega", "x": brick["x"], "y": brick["y"]}
-    elif seed >= 75:
-        bonus = {"type": "hp", "x": brick["x"], "y": brick["y"]}
-    elif seed >= 70:
-        bonus = {"type": "invulnerability", "x": brick["x"], "y": brick["y"]}
-    elif seed >= 65:
-        bonus = {"type": "speed", "x": brick["x"], "y": brick["y"]}
-    elif seed >= 50:
-        bonus = {"type": "barrel", "x": brick["x"], "y": brick["y"]}
-    else:
-        return None
-    return bonus
+    result.sort(key=lambda element: element['number'])
+    return result, page_rows.has_prev, page_rows.has_next
 
 
