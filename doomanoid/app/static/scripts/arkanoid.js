@@ -14,6 +14,9 @@ let up_arrow_pressed = false;
 let down_arrow_pressed = false;
 let space_pressed = false;
 
+let current_username = null;
+let current_score_page = 1;
+
 document.addEventListener("keydown", function (event) {
     switch (event.key) {
         case "ArrowLeft":
@@ -384,6 +387,9 @@ function create_enemies(enemies_list) {
         if (enemy["type"] === "baron") {
             current_enemy = new Baron(context, enemy["type"], enemy["x"] + random_x, enemy["y"]);
         }
+        if (enemy["type"] === "arachnotron") {
+            current_enemy = new Arachnotron(context, enemy["type"], enemy["x"], enemy["y"]);
+        }
         enemies.push(current_enemy);
     }
     return enemies;
@@ -451,79 +457,112 @@ $('#add-score-form').on('submit', function (event) {
     if (username.length === 0) {
         return false;
     } else {
-        add_score(username);
+        if (username.length > 30) {
+                    let excess_chars = username.length - 30;
+                    username = username.substr(0, decoded_user.length - excess_chars);
+        }
+        current_username = username
+        add_score();
     }
 });
 
-function add_score(username) {
+function add_score() {
     $('#add-score-container').css({"opacity": "0"});
     $("#add-score-form")[0].reset();
     $.ajax({
             url: "/add_score",
             async: false,
             type: "POST",
-            data: {"score": last_score, "user": username, "date": Date.now()}
+            data: {"score": last_score, "user": current_username, "date": Date.now()}
         }
     );
-    show_score(last_score, username);
+    show_user_result();
 }
 
-function show_score(score, user) {
-    let current_user_shown = false;
-    let score_table = $('#top-scores');
-    if (score_table.css("opacity") === "0") {
+async function show_score() {
+    let score_table_container = $('#top-scores');
+    if (score_table_container.css("opacity") === "0") {
         $('#add-score-container').css({"opacity": "0"});
-        $.ajax({
-            url: "/show_score",
-            type: "GET",
-            contentType: "application/json",
-            success: function (data) {
-                let rows_count = data.length;
-                let decoded_user = decodeURIComponent(user);
-                if (decoded_user.length > 30) {
-                    let excess_chars = decoded_user.length - 30;
-                    decoded_user = decoded_user.substr(0, decoded_user.length - excess_chars);
-                }
-                if (data.length > 20) {
-                    rows_count = 20;
-                }
-                score_table.css({"opacity": "1"});
-                $("tr", score_table).remove();
-                score_table.append("<tr><th width='10%'>№</th><th width='50%'>Name</th><th width='20%'>Score</th><th width='10%'>Date</th></tr>")
-                for (let i = 0; i < rows_count; i++) {
-                    if ((score === data[i]["score"]) && (decoded_user === data[i]["username"]) && (!current_user_shown)) {
-                        current_user_shown = true;
-                        score_table.append("<tr style='color: black'></tr>");
-                        add_row(data, i)
-                    } else {
-                        score_table.append("<tr></tr>");
-                        add_row(data, i)
-                    }
-                }
-
-                if (!current_user_shown && (typeof score != "undefined") && (typeof user != "undefined")) {
-                    $("#top-scores > tr:last").remove();
-                    $("#top-scores > tr:last").remove();
-                    score_table.append("<tr></tr>");
-                    $("#top-scores > tr:last").append("<td>...</td><td>...</td><td>...</td><td>...</td>");
-                    for (let i = rows_count; i < data.length; i++) {
-                        if ((score === data[i]["score"]) && (decoded_user === data[i]["username"])) {
-                            score_table.append("<tr style='color: black'></tr>");
-                            add_row(data, i);
-                            break;
-                        }
-                    }
-                }
-            }
-        });
+        let data = await get_score_results(current_score_page);
+        if (data) {
+            check_prev_and_next(data.has_prev, data.has_next);
+            score_table_container.css({"opacity": "1"});
+            create_table(data.page_rows, last_score, current_username);
+        }
     } else {
-        score_table.css({"opacity": "0"});
+        score_table_container.css({"opacity": "0"});
     }
 }
 
-function add_row(data, row_number) {
-    $("#top-scores > tr:last").append(
-        "<td>" + (row_number + 1) + "</td>"
+async function get_score_results(page_index) {
+    let response = await fetch('/show_score_page?' + `page_index=${page_index}`);
+    if (response.ok) {
+        return await response.json();
+    }
+}
+
+function prev_page() {
+    let score_table_container = $('#top-scores');
+    current_score_page -= 1;
+    score_table_container.css({"opacity": "0"});
+    setTimeout(show_score, 1050);
+}
+
+function next_page() {
+    let score_table_container = $('#top-scores');
+    current_score_page += 1;
+    score_table_container.css({"opacity": "0"});
+    setTimeout(show_score, 1050);
+}
+
+function check_prev_and_next(has_prev, has_next) {
+    let prev_page_btn = $('#prev_page_btn');
+    let next_page_btn = $('#next_page_btn');
+
+    has_prev ? prev_page_btn.prop('disabled', false) : prev_page_btn.prop('disabled', true);
+    has_next ? next_page_btn.prop('disabled', false) : next_page_btn.prop('disabled', true);
+}
+
+function show_user_result() {
+    let score_table_container = $('#top-scores');
+    $('#add-score-container').css({"opacity": "0"});
+    $.ajax({
+        url: "/show_user_result",
+        type: "GET",
+        data: {
+            username: current_username,
+            score: last_score
+        },
+        success: function (data) {
+            check_prev_and_next(data.has_prev, data.has_next);
+            score_table_container.css({"opacity": "1"});
+            create_table(data['page_rows'], last_score, current_username);
+            current_score_page = data['page_index']
+        }
+    });
+}
+
+function create_table(data, score, username) {
+    let score_table = $('#top-scores-table');
+    let current_user_shown = false;
+    let rows_count = data.length;
+    $("tr", score_table).remove();
+    score_table.append("<tr><th width='10%'>№</th><th width='50%'>Name</th><th width='20%'>Score</th><th width='10%'>Date</th></tr>")
+    for (let i = 0; i < rows_count; i++) {
+        if ((score === data[i]["score"]) && (username === data[i]["username"]) && (!current_user_shown)) {
+            current_user_shown = true;
+            score_table.append("<tr style='color: black'></tr>");
+            add_row(score_table, data, i)
+        } else {
+            score_table.append("<tr></tr>");
+            add_row(score_table, data, i)
+        }
+    }
+}
+
+function add_row(score_table, data, row_number) {
+    $("tr:last", score_table).append(
+        "<td>" + (data[row_number]["number"]) + "</td>"
         + "<td>" + data[row_number]["username"] + "</td>"
         + "<td>" + data[row_number]["score"] + "</td>"
         + "<td>" + data[row_number]["date"] + "</td>");

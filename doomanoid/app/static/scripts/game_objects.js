@@ -1489,6 +1489,58 @@ class Baron extends Enemy {
     }
 }
 
+class Arachnotron extends Enemy {
+    constructor(context, type, x, y) {
+        super(context, type, x, y)
+        this.x = x;
+        this.height = 50;
+        this.width = 80;
+        this.y = y - this.height;
+        this.hp = 50;
+        this.score = 500;
+        this.shooting_delay = 500 + Math.floor(Math.random() * 500);
+        this.type = type;
+        this.rockets_fired = 0;
+        this.rockets_in_row = 5;
+
+        this.injured_sound = "/static/sound/" + type + "_injured.wav";
+        this.injure = new Image();
+        this.injure.src = "/static/images/arkanoid/" + type + "_injured.png";
+        this.death_sound_2 = this.death_sound_1
+    }
+
+    checkForShooting() {
+        if (!this.dead && this.onBrick) {
+            if (this.shooting_delay === 60) {
+                this.frame_count = 0;
+            }
+
+            if (this.shooting_delay < 60) {
+                this.shooting = true;
+            }
+
+            if (this.shooting && this.shooting_delay === 0 && this.rockets_fired < this.rockets_in_row) {
+                this.rockets_fired++
+                play_audio(this.fire_sound);
+                if (this.x + this.width / 2 < ball.x) {
+                    rockets.push(new Green_fire(this.context, "red_fire", this.x + this.width, this.y + this.height / 2 - 5));
+                } else {
+                    rockets.push(new Green_fire(this.context, "red_fire", this.x, this.y + this.height / 2 - 5));
+                }
+                this.shooting_delay = 5
+            }
+
+            if (this.shooting_delay > 0) {
+                this.shooting_delay--;
+            }
+            if (this.rockets_fired === this.rockets_in_row) {
+                this.shooting_delay = 500 + Math.floor(Math.random() * 1000);
+                this.rockets_fired = 0;
+            }
+        }
+    }
+}
+
 class Cyberdemon {
     constructor(lvl) {
         this.context = context;

@@ -16,9 +16,13 @@ Doomanoid
     <div class="arkanoid">
         <canvas id="arkanoid" width="800" height="600" tabindex="0"></canvas>
         <img id="arkanoid-background" src="/static/images/arkanoid/arkanoid-background.jpg">
-        <table class="top-scores" id="top-scores" border="1">
-            <caption>Best results</caption>
-        </table>
+        <div class="top-scores" id="top-scores">
+            <table class="top-scores-table" id="top-scores-table">
+                <caption>Best results</caption>
+            </table>
+            <input class="button" type="button" id="prev_page_btn" value="<<" onclick="prev_page()">
+            <input class="button" type="button" id="next_page_btn" value=">>" onclick="next_page()">
+        </div>
         <div class="form" id="add-score-container">
             <form id="add-score-form" action="" method="POST" autocomplete="off">
                 <input class="add-score-input" type="text" name="name" placeholder="Enter your name"/>

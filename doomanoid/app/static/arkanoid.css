@@ -52,6 +52,19 @@ td {
     transition: 1s;
 }
 
+.top-scores-table {
+    border: 1px white solid;
+    border-collapse: collapse;
+}
+
+.top-scores-table > tr {
+    border: inherit;
+}
+
+.top-scores-table > tr > td,th {
+    border: inherit;
+}
+
 .form {
     opacity: 0;
     transition: 1s;
@@ -72,7 +85,7 @@ td {
 
 .description {
     width: 100%;
-    margin: 40px auto;
+    margin: 60px auto;
 }
 
 .items, .monsters {
