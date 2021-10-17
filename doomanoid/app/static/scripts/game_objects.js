@@ -1186,37 +1186,43 @@ class Enemy {
         }
 
         if (!this.dead && this.shooting && this.frame_count <= 10) {
+            let height_diff = this.height - this.fire_right_1.height;
             if (this.x < ball.x) {
-                this.context.drawImage(this.fire_right_1, this.x, this.y);
+                this.context.drawImage(this.fire_right_1, this.x, this.y + height_diff);
                 this.frame_count++;
                 return;
             }
             if (this.x > ball.x) {
-                this.context.drawImage(this.fire_left_1, this.x, this.y);
+                let height_diff = this.height - this.fire_left_1.height;
+                this.context.drawImage(this.fire_left_1, this.x, this.y + height_diff);
                 this.frame_count++;
                 return;
             }
         }
         if (!this.dead && this.shooting && this.frame_count <= 40) {
             if (this.x < ball.x) {
-                this.context.drawImage(this.fire_right_2, this.x, this.y);
+                let height_diff = this.height - this.fire_right_2.height;
+                this.context.drawImage(this.fire_right_2, this.x, this.y + height_diff);
                 this.frame_count++;
                 return;
             }
             if (this.x > ball.x) {
-                this.context.drawImage(this.fire_left_2, this.x, this.y);
+                let height_diff = this.height - this.fire_left_2.height;
+                this.context.drawImage(this.fire_left_2, this.x, this.y + height_diff);
                 this.frame_count++;
                 return;
             }
         }
         if (!this.dead && this.shooting && this.frame_count <= 120) {
             if (this.x < ball.x) {
-                this.context.drawImage(this.fire_right_3, this.x, this.y);
+                let height_diff = this.height - this.fire_right_3.height;
+                this.context.drawImage(this.fire_right_3, this.x, this.y + height_diff);
                 this.frame_count++;
                 return;
             }
             if (this.x > ball.x) {
-                this.context.drawImage(this.fire_left_3, this.x, this.y);
+                let height_diff = this.height - this.fire_left_3.height;
+                this.context.drawImage(this.fire_left_3, this.x, this.y + height_diff);
                 this.frame_count++;
                 return;
             }
@@ -1431,9 +1437,9 @@ class Imp extends Enemy {
             if (this.shooting && this.shooting_delay === 0) {
                 play_audio(this.fire_sound);
                 if (this.x + this.width / 2 < ball.x) {
-                    rockets.push(new Red_fire(this.context, "red_fire", this.x + this.width, this.y + this.height / 2 - 5));
+                    projectiles.push(new Red_fire(this.context, "red_fire", this.x + this.width, this.y + this.height / 2 - 5));
                 } else {
-                    rockets.push(new Red_fire(this.context, "red_fire", this.x, this.y + this.height / 2 - 5));
+                    projectiles.push(new Red_fire(this.context, "red_fire", this.x, this.y + this.height / 2 - 5));
                 }
                 this.shooting_delay = 400 + Math.floor(Math.random() * 400)
             }
@@ -1475,9 +1481,9 @@ class Baron extends Enemy {
             if (this.shooting && this.shooting_delay === 0) {
                 play_audio(this.fire_sound);
                 if (this.x + this.width / 2 < ball.x) {
-                    rockets.push(new Green_fire(this.context, "green_fire", this.x + this.width, this.y + this.height / 2 - 5));
+                    projectiles.push(new Green_fire(this.context, "green_fire", this.x + this.width, this.y + this.height / 2 - 5));
                 } else {
-                    rockets.push(new Green_fire(this.context, "green_fire", this.x, this.y + this.height / 2 - 5));
+                    projectiles.push(new Green_fire(this.context, "green_fire", this.x, this.y + this.height / 2 - 5));
                 }
                 this.shooting_delay = 300 + Math.floor(Math.random() * 300)
             }
@@ -1493,12 +1499,12 @@ class Arachnotron extends Enemy {
     constructor(context, type, x, y) {
         super(context, type, x, y)
         this.x = x;
-        this.height = 50;
+        this.height = 44;
         this.width = 80;
         this.y = y - this.height;
         this.hp = 50;
-        this.score = 500;
-        this.shooting_delay = 500 + Math.floor(Math.random() * 500);
+        this.score = 400;
+        this.shooting_delay = 300 + Math.floor(Math.random() * 1500);
         this.type = type;
         this.rockets_fired = 0;
         this.rockets_in_row = 5;
@@ -1523,9 +1529,9 @@ class Arachnotron extends Enemy {
                 this.rockets_fired++
                 play_audio(this.fire_sound);
                 if (this.x + this.width / 2 < ball.x) {
-                    rockets.push(new Green_fire(this.context, "red_fire", this.x + this.width, this.y + this.height / 2 - 5));
+                    projectiles.push(new Yellow_plasma(this.context, "yellow_plasma", this.x + this.width - 5, this.y + this.height / 2 - 15));
                 } else {
-                    rockets.push(new Green_fire(this.context, "red_fire", this.x, this.y + this.height / 2 - 5));
+                    projectiles.push(new Yellow_plasma(this.context, "yellow_plasma", this.x + 5, this.y + this.height / 2 - 15));
                 }
                 this.shooting_delay = 5
             }
@@ -1534,7 +1540,7 @@ class Arachnotron extends Enemy {
                 this.shooting_delay--;
             }
             if (this.rockets_fired === this.rockets_in_row) {
-                this.shooting_delay = 500 + Math.floor(Math.random() * 1000);
+                this.shooting_delay = 500 + Math.floor(Math.random() * 1500);
                 this.rockets_fired = 0;
             }
         }
@@ -1801,9 +1807,9 @@ class Cyberdemon {
                 this.rockets_fired++;
                 play_audio(this.fire_sound);
                 if (this.x + this.width / 2 < ball.x) {
-                    rockets.push(new Rocket(this.context, "rocket", this.x + this.width + 15, this.y + this.height / 2 - 10));
+                    projectiles.push(new Rocket(this.context, "rocket", this.x + this.width + 15, this.y + this.height / 2 - 10));
                 } else {
-                    rockets.push(new Rocket(this.context, "rocket", this.x + 15, this.y + this.height / 2));
+                    projectiles.push(new Rocket(this.context, "rocket", this.x + 15, this.y + this.height / 2));
                 }
                 this.shooting_delay = 10;
             }
@@ -1853,6 +1859,8 @@ class Projectile {
         this.x = x;
         this.y = y;
         this.type = type;
+
+        this.is_homing = true;
 
         let vector = [ball.x - this.x, ball.y - this.y];
         let length = Math.sqrt(vector[0] * vector[0] + vector[1] * vector[1]);
@@ -1935,7 +1943,7 @@ class Projectile {
 
             let acceleration_vector = [ball.x - this.x, ball.y - this.y];
 
-            if (ball.invisibility_duration === 0) {
+            if (ball.invisibility_duration === 0 && this.is_homing) {
                 this.acceleration = [acceleration_vector[0] * this.acceleration_multiplier, acceleration_vector[1] * this.acceleration_multiplier];
             } else {
                 this.acceleration = [this.speed[0] * this.acceleration_multiplier, this.speed[1] * this.acceleration_multiplier];
@@ -1977,6 +1985,9 @@ class Projectile {
                     case "green_fire":
                         ball.speed = [ball.speed[0] / 2, ball.speed[1] / 2];
                         ball.change_acceleration([vector[0] / length * 5, vector[1] / length * 5]);
+                        break;
+                    case "yellow_plasma":
+                        ball.change_acceleration([vector[0] / length * 3, vector[1] / length * 3]);
                 }
                 ball.change_hp(-1);
             }
@@ -2012,6 +2023,17 @@ class Green_fire extends Projectile {
 
         this.radius = 10;
         this.acceleration_multiplier = 0.0003;
+    }
+}
+
+class Yellow_plasma extends Projectile {
+    constructor(context, type, x, y) {
+        super(context, type, x, y)
+        this.width = 13;
+        this.height = 13;
+        this.acceleration_multiplier = 0.005;
+        this.is_homing = false;
+        this.radius = 5;
     }
 }
 

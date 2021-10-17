@@ -70,7 +70,7 @@ let debris_list = [];
 let bonuses = [];
 let enemies = [];
 let cyberdemon = null;
-let rockets = [];
+let projectiles = [];
 
 let score_list = [];
 let message_list = [];
@@ -220,14 +220,14 @@ function loop() {
                 random_bonus_generation();
             }
 
-            for (let i = 0; i < rockets.length; i++) {
-                let current_rocket = rockets[i];
+            for (let i = 0; i < projectiles.length; i++) {
+                let current_rocket = projectiles[i];
                 current_rocket.move();
                 current_rocket.draw();
                 current_rocket.collision();
 
                 if (current_rocket.explode && current_rocket.frame_count === 30) {
-                    rockets.splice(i, 1);
+                    projectiles.splice(i, 1);
                 }
             }
 
@@ -422,7 +422,7 @@ function reset_loop_vars() {
     message_list = [];
     debris_list = [];
     cyberdemon = null;
-    rockets = [];
+    projectiles = [];
     lvl_end_timer = 0;
     ball.reset();
     paddle.reset();
