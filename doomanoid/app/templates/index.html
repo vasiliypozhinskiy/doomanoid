@@ -117,7 +117,7 @@ Doomanoid
                 <td>Замедляет какодемона в 2 раза.</td>
             </tr>
             <tr>
-                <td><img src="{{url_for('static', filename='images/arkanoid/cyberdemon_right3.png')}}"></td>
+                <td><img src="{{url_for('static', filename='images/arkanoid/cyberdemon_fire_right3.png')}}"></td>
                 <td>Кибердемон</td>
                 <td>Стреляет залпом самонаводящихся ракет. Количество ракет зависит от уровня.</td>
                 <td>Количество hp зависит от уровня.</td>
@@ -130,6 +130,8 @@ Doomanoid
     </div>
 </div>
 <script src="{{url_for('static', filename='scripts/game_objects.js')}}"></script>
+<script src="{{url_for('static', filename='scripts/bricks.js')}}"></script>
+<script src="{{url_for('static', filename='scripts/enemies.js')}}"></script>
 <script src="{{url_for('static', filename='scripts/arkanoid.js')}}"></script>
 
 {% endblock %}

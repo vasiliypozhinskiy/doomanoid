@@ -5,6 +5,8 @@ services:
         build: ./doomanoid
         container_name:  app
         restart: always
+        environment:
+            - WAIT_HOSTS=db:5432
         ports:
             - "5000:5000"
     nginx:
