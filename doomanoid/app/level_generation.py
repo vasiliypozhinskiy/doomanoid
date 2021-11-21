@@ -4,7 +4,7 @@ from app.arkanoid_cfg import arkanoidConfig
 
 
 def generate_default_lvl(lvl):
-    bricks = generate_bricks(4, 8, 40, 60, lvl)
+    bricks = generate_bricks(4, 8, arkanoidConfig['FIRST_BRICK_OFFSET_X'], arkanoidConfig['TOP_LEVEL_BRICK_OFFSET_Y'], lvl)
     bonuses = []
     enemies = generate_enemies(bricks, lvl)
 
@@ -17,16 +17,16 @@ def generate_default_lvl(lvl):
 
 
 def generate_lvl_with_arachnotrons(lvl):
-    bricks = generate_bricks(4, 5, 120, 60, lvl)
+    bricks = generate_bricks(4, 5, arkanoidConfig['FIRST_BRICK_OFFSET_X'] * 3, arkanoidConfig['TOP_LEVEL_BRICK_OFFSET_Y'], lvl)
     bricks_for_arachnotrons = [
-        {"type": 'grey', "x": 10, "y": 100, "has_enemy": False},
-        {"type": 'grey', "x": arkanoidConfig['CANVAS_WIDTH'] - arkanoidConfig['BRICK_WIDTH'] - 10, "y": 100, "has_enemy": False},
-        {"type": 'grey', "x": 10, "y": 400, "has_enemy": False},
-        {"type": 'grey', "x": arkanoidConfig['CANVAS_WIDTH'] - arkanoidConfig['BRICK_WIDTH'] - 10, "y": 400, "has_enemy": False},
+        {"type": 'black', "x": 10, "y": 100, "has_enemy": False},
+        {"type": 'black', "x": arkanoidConfig['CANVAS_WIDTH'] - arkanoidConfig['BRICK_WIDTH'] - 10, "y": 100, "has_enemy": False},
+        {"type": 'black', "x": 10, "y": 300, "has_enemy": False},
+        {"type": 'black', "x": arkanoidConfig['CANVAS_WIDTH'] - arkanoidConfig['BRICK_WIDTH'] - 10, "y": 300, "has_enemy": False},
     ]
     bonuses = []
     enemies = generate_enemies(bricks, lvl)
-    count_of_arachnotrons = lvl // 5 + 5
+    count_of_arachnotrons = lvl // 5 + 1
     arachnotrons = generate_arachnotrons(bricks_for_arachnotrons, count_of_arachnotrons)
     return bricks + bricks_for_arachnotrons, bonuses, enemies + arachnotrons
 
@@ -81,7 +81,7 @@ def generate_brick(x, y, lvl):
 
 
 def generate_barons(bricks, count):
-    top_bricks = [(brick, bricks.index(brick)) for brick in bricks if brick["y"] == arkanoidConfig["BRICK_OFFSET_Y"] + 20]
+    top_bricks = [(brick, bricks.index(brick)) for brick in bricks if brick["y"] == arkanoidConfig["TOP_LEVEL_BRICK_OFFSET_Y"]]
     seeds = []
     barons = []
     if count > len(top_bricks):
@@ -108,7 +108,7 @@ def generate_doomguys_and_imps(bricks, count):
             seeds.append(seed)
     for seed in seeds:
         random_enemy = random.randint(0, 100)
-        if random_enemy >= 70:
+        if random_enemy >= 50:
             enemy = {"type": "imp", "x": bricks[seed]["x"], "y": bricks[seed]["y"]}
         else:
             enemy = {"type": "doomguy", "x": bricks[seed]["x"], "y": bricks[seed]["y"]}

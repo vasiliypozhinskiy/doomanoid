@@ -30,10 +30,10 @@ def get_config():
 @app.route('/generate_arkanoid_lvl')
 def generate_lvl():
     lvl = int(request.args["lvl"])
-    # if lvl % 5 == 3:
-    bricks, bonuses, enemies = generate_lvl_with_arachnotrons(lvl)
-    # else:
-    #     bricks, bonuses, enemies = generate_default_lvl(lvl)
+    if lvl % 5 == 3:
+        bricks, bonuses, enemies = generate_lvl_with_arachnotrons(lvl)
+    else:
+        bricks, bonuses, enemies = generate_default_lvl(lvl)
     return jsonify(bricks=bricks, bonuses=bonuses, enemies=enemies)
 
 

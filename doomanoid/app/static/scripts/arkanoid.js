@@ -69,7 +69,6 @@ let bricks = [];
 let debris_list = [];
 let bonuses = [];
 let enemies = [];
-let cyberdemon = null;
 let projectiles = [];
 
 let score_list = [];
@@ -165,9 +164,6 @@ function loop() {
             ball.friction();
 
             ball.paddleCollision(paddle);
-            if (bricks.length === 0) {
-                lvl_end_timer++;
-            }
 
             if (lvl_end_timer === 240) {
                 current_lvl += 1;
@@ -198,38 +194,9 @@ function loop() {
                 }
             }
 
-            for (let i = 0; i < enemies.length; i++) {
-                let current_enemy = enemies[i];
-                current_enemy.move();
-                current_enemy.draw();
-                current_enemy.brickCollision(bricks);
-                current_enemy.checkForShooting();
-                current_enemy.ballCollision();
-                current_enemy.friction();
-            }
+            process_enemies(enemies);
 
-            if (cyberdemon != null) {
-                if (cyberdemon.dead && cyberdemon.frame_count === 200) {
-                    lvl_end_timer++;
-                }
-                cyberdemon.move();
-                cyberdemon.draw();
-                cyberdemon.ballCollision();
-                cyberdemon.checkForShooting();
-                cyberdemon.hp_indicator();
-                random_bonus_generation();
-            }
-
-            for (let i = 0; i < projectiles.length; i++) {
-                let current_rocket = projectiles[i];
-                current_rocket.move();
-                current_rocket.draw();
-                current_rocket.collision();
-
-                if (current_rocket.explode && current_rocket.frame_count === 30) {
-                    projectiles.splice(i, 1);
-                }
-            }
+            process_projectiles(projectiles);
 
             paddle.draw();
             ball.random_animation();
@@ -260,6 +227,44 @@ function loop() {
     }
 }
 
+let process_enemies = (enemies) => {
+    let all_enemies_dead = true;
+    for (let i = 0; i < enemies.length; i++) {
+        let current_enemy = enemies[i];
+        if (!current_enemy.dead) {
+            all_enemies_dead = false;
+        }
+        current_enemy.move();
+        current_enemy.draw();
+        current_enemy.brickCollision(bricks);
+        current_enemy.checkForShooting();
+        current_enemy.ballCollision();
+
+        if (current_enemy instanceof Cyberdemon) {
+            current_enemy.draw_hp_indicator();
+            random_bonus_generation();
+        } else {
+            current_enemy.friction();
+        }
+    }
+    if (all_enemies_dead) {
+        lvl_end_timer++
+    }
+}
+
+let process_projectiles = (projectiles) => {
+    for (let i = 0; i < projectiles.length; i++) {
+        let current_projectile = projectiles[i];
+        current_projectile.move();
+        current_projectile.draw();
+        current_projectile.collision();
+
+        if (current_projectile.explode && current_projectile.frame_count === 30) {
+            projectiles.splice(i, 1);
+        }
+    }
+}
+
 function arkanoid_start(lvl) {
     lvl_ended = false;
     $("#arkanoid").focus();
@@ -269,8 +274,9 @@ function arkanoid_start(lvl) {
     $('#start').attr("disabled", true);
     $('#show-score').attr("disabled", true);
     if (lvl % 5 === 0) {
-        cyberdemon = new Cyberdemon(lvl);
-        bricks.push(new InvulnerableBrick(context, "invulnerable", config.CANVAS_HEIGHT / 2, config.CANVAS_WIDTH / 2));
+        let boss = new Cyberdemon(lvl)
+        enemies.push(boss);
+        bricks.push(new InvulnerableBrick(config.CANVAS_HEIGHT / 2, config.CANVAS_WIDTH / 2, boss));
         message_list.push(new Message(context, "Level " + lvl));
         play_audio(start_sound);
         start_animation(config.fps);
@@ -326,14 +332,18 @@ function create_bricks(bricks_list) {
     for (let i = 0; i < bricks_list.length; i++) {
         let brick = bricks_list[i];
         let current_brick;
-        if (brick["type"] === "brown") {
-            current_brick = new BrownBrick(context, brick["type"], brick["x"], brick["y"]);
-        }
-        if (brick["type"] === "default") {
-            current_brick = new DefaultBrick(context, brick["type"], brick["x"], brick["y"]);
-        }
-        if (brick["type"] === "grey") {
-            current_brick = new GreyBrick(context, brick["type"], brick["x"], brick["y"]);
+        switch (brick['type']) {
+            case "default":
+                current_brick = new DefaultBrick(brick["x"], brick["y"]);
+                break;
+            case "brown":
+                current_brick = new BrownBrick(brick["x"], brick["y"]);
+                break;
+            case "grey":
+                current_brick = new GreyBrick(brick["x"], brick["y"]);
+                break;
+            case "black":
+                current_brick = new BlackBrick(brick["x"], brick["y"]);
         }
         bricks.push(current_brick);
     }
@@ -379,16 +389,16 @@ function create_enemies(enemies_list) {
         let random_x = Math.floor(Math.random() * 41 - 20);
         let enemy = enemies_list[i];
         if (enemy["type"] === "doomguy") {
-            current_enemy = new Doomguy(context, enemy["type"], enemy["x"] + random_x, enemy["y"]);
+            current_enemy = new Doomguy(enemy["x"] + random_x, enemy["y"]);
         }
         if (enemy["type"] === "imp") {
-            current_enemy = new Imp(context, enemy["type"], enemy["x"] + random_x, enemy["y"]);
+            current_enemy = new Imp(enemy["x"] + random_x, enemy["y"]);
         }
         if (enemy["type"] === "baron") {
-            current_enemy = new Baron(context, enemy["type"], enemy["x"] + random_x, enemy["y"]);
+            current_enemy = new Baron(enemy["x"] + random_x, enemy["y"]);
         }
         if (enemy["type"] === "arachnotron") {
-            current_enemy = new Arachnotron(context, enemy["type"], enemy["x"], enemy["y"]);
+            current_enemy = new Arachnotron(enemy["x"], enemy["y"]);
         }
         enemies.push(current_enemy);
     }
@@ -421,7 +431,6 @@ function reset_loop_vars() {
     score_list = [];
     message_list = [];
     debris_list = [];
-    cyberdemon = null;
     projectiles = [];
     lvl_end_timer = 0;
     ball.reset();
