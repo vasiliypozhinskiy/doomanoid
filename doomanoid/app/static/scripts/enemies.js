@@ -334,7 +334,7 @@ class Imp extends Enemy {
     WIDTH = 30;
 
     MIN_SHOOTING_DELAY = 400;
-    FIRE_RATE = 400;
+    FIRE_RATE = 600;
 
     constructor(x, y) {
         super(x, y, 'imp')
@@ -362,8 +362,8 @@ class Baron extends Enemy {
     HEIGHT = 50;
     WIDTH = 30;
 
-    MIN_SHOOTING_DELAY = 300;
-    FIRE_RATE = 300;
+    MIN_SHOOTING_DELAY = 400;
+    FIRE_RATE = 400;
 
     constructor(x, y) {
         super(x, y, 'baron')
@@ -392,7 +392,7 @@ class Baron extends Enemy {
 
 class Arachnotron extends Enemy {
     MIN_SHOOTING_DELAY = 500;
-    FIRE_RATE = 500;
+    FIRE_RATE = 1000;
 
     SCORE = 400;
 

@@ -4,7 +4,13 @@ from app.arkanoid_cfg import arkanoidConfig
 
 
 def generate_default_lvl(lvl):
-    bricks = generate_bricks(4, 8, arkanoidConfig['FIRST_BRICK_OFFSET_X'], arkanoidConfig['TOP_LEVEL_BRICK_OFFSET_Y'], lvl)
+    bricks = generate_bricks(
+        number_of_rows=4,
+        bricks_in_row=8,
+        offset_by_x=arkanoidConfig['FIRST_BRICK_OFFSET_X'],
+        offset_by_y=arkanoidConfig['TOP_LEVEL_BRICK_OFFSET_Y'],
+        lvl=lvl
+    )
     bonuses = []
     enemies = generate_enemies(bricks, lvl)
 
@@ -17,18 +23,33 @@ def generate_default_lvl(lvl):
 
 
 def generate_lvl_with_arachnotrons(lvl):
-    bricks = generate_bricks(4, 5, arkanoidConfig['FIRST_BRICK_OFFSET_X'] * 3, arkanoidConfig['TOP_LEVEL_BRICK_OFFSET_Y'], lvl)
-    bricks_for_arachnotrons = [
-        {"type": 'black', "x": 10, "y": 100, "has_enemy": False},
-        {"type": 'black', "x": arkanoidConfig['CANVAS_WIDTH'] - arkanoidConfig['BRICK_WIDTH'] - 10, "y": 100, "has_enemy": False},
-        {"type": 'black', "x": 10, "y": 300, "has_enemy": False},
-        {"type": 'black', "x": arkanoidConfig['CANVAS_WIDTH'] - arkanoidConfig['BRICK_WIDTH'] - 10, "y": 300, "has_enemy": False},
-    ]
-    bonuses = []
+    bricks = generate_bricks(
+        number_of_rows=4,
+        bricks_in_row=5,
+        offset_by_x=arkanoidConfig['FIRST_BRICK_OFFSET_X'] * 5 - 20,
+        offset_by_y=arkanoidConfig['TOP_LEVEL_BRICK_OFFSET_Y'],
+        lvl=lvl
+    )
+    bricks_for_arachnotrons = generate_bricks_for_arachnotrons(lvl // 10 + 1)
+
     enemies = generate_enemies(bricks, lvl)
+    bonuses = generate_bonuses(bricks)
     count_of_arachnotrons = lvl // 5 + 1
     arachnotrons = generate_arachnotrons(bricks_for_arachnotrons, count_of_arachnotrons)
     return bricks + bricks_for_arachnotrons, bonuses, enemies + arachnotrons
+
+
+def generate_bricks_for_arachnotrons(count_of_pairs):
+    bricks = []
+    for i in range(1, count_of_pairs + 1):
+        bricks.append({"type": 'black', "x": 10, "y": 120 * i - 40, "has_enemy": False})
+        bricks.append({
+            "type": 'black',
+            "x": arkanoidConfig['CANVAS_WIDTH'] - arkanoidConfig['BRICK_WIDTH'] - 10,
+            "y": 120 * i - 40,
+            "has_enemy": False}
+        )
+    return bricks
 
 
 def generate_bricks(number_of_rows, bricks_in_row, offset_by_x, offset_by_y, lvl):
@@ -120,8 +141,8 @@ def generate_doomguys_and_imps(bricks, count):
 def generate_arachnotrons(bricks, count):
     seeds = []
     arachnotrons = []
-    if count > 4:
-        count = 4
+    if count > 6:
+        count = 6
     while len(seeds) < count:
         seed = random.randint(0, len(bricks) - 1)
         if seed not in seeds and not bricks[seed]["has_enemy"]:
